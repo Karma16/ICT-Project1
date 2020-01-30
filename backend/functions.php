@@ -1,5 +1,5 @@
 <?php
-require ('validation.php');
+//require ('validation.php');
 function round_time($ts, $step) {
 	
  return(floor(floor($ts/60)/60)*3600+floor(date("i",$ts)/$step)*$step*60);
@@ -7,8 +7,8 @@ function round_time($ts, $step) {
 }
 
 function get_weeks($dateFromString, $dateToString)
-{  date_validation($dateFromString);
-date_validation($dateToString);
+{  //date_validation($dateFromString);
+//date_validation($dateToString);
     $dateFrom = new \DateTime($dateFromString);
     $dateTo = new \DateTime($dateToString);
     $dates = [];

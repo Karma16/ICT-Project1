@@ -32,7 +32,7 @@ What interval to see data do you prefer?</p>
 if(isset($_POST['formSubmit'])) 
 { 
   $period = $_POST['period'];
-    $start_date = $_POST['start_date'];
+  $start_date = $_POST['start_date'];
   $end_date = $_POST['end_date'];
   $errorMessage = "";
   

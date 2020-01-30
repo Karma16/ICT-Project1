@@ -8,21 +8,23 @@
         
     </body>
 </html>
-    <?php 
+    <?php
+header("Refresh: 60");
 
 include('dropdown.php');
 
 require ('functions.php');
 
-
-
 $API_KEY = "5ARVF4ITHJJT44GH";
+    $dates = [];
+echo "start date: ".$start_date.'<br/>';
+echo "end date: ".$end_date.'<br/>';
 
-// $period =  $_SESSION['period'];
- echo "period : ".$period.'<br/>';   
+ echo $period;   
    $atts = array(
     'width' => '600',
     'height' => '410',
+    'time' => 'intraday',
     'number' => '90',
     'size' => 'compac', /* compac or full */
     'interval' => '5', /* 1min, 5min, 15min, 30min, 60min */
@@ -30,13 +32,8 @@ $API_KEY = "5ARVF4ITHJJT44GH";
     'cache' => 3600
   );
    
-//$atts['time'] = $period; 
     
 date_default_timezone_set('America/New_York');
-
-
-
-
 
     switch ($period) {
         case 'intraday':
@@ -49,7 +46,7 @@ date_default_timezone_set('America/New_York');
             $series = 'TIME_SERIES_DAILY';
             $series_name = 'Time Series (Daily)';
             $atts['interval'] ='';
-     $dates=get_days($start_date,$end_date); 
+          $dates=get_days($start_date,$end_date); 
       
             break;
         case '3':
@@ -73,6 +70,7 @@ date_default_timezone_set('America/New_York');
 //JSON
 
 echo '  series: '.$series_name.'<br/>';
+
 $url="https://www.alphavantage.co/query?function=".$series."&symbol=GOOGL&interval=" . $atts['interval'] . "min&apikey=".$atts['apikey'];
     
 $ch = curl_init();
@@ -85,57 +83,52 @@ $result = json_decode($server_output);
 
 
 
-
-    $dates = [];
-echo "start date: ".$start_date.'<br/>';
-echo "end date: ".$end_date.'<br/>';
-/*
-switch($period)
-    {
-      case "month":$dates = get_months($start_date, $end_date); 
-            break;
-      case "week": $dates = get_weeks($start_date, $end_date);  
-            break;
-      case "day": $dates=get_days($start_date,$end_date); 
-            break;
-      case "intraday":  $dates=get_5mins($start_date,$end_date);
-            break;
-      default: echo("Error!"); 
-            exit(); 
-            break;
-}
-*/
 $dataForAllDays = $result->{$series_name};
+
+$dataForSingleDate = $dataForAllDays->{$today}; 
+
+
+$counter=0;
 foreach ($dates as $value){ 
-           
- 
- 
-     $dayofweek = date('l', strtotime($value));
-  //   echo 'dayOfweek : '.$dayofweek.'<br/>';
-    if ($dayofweek='Sunday' or $dayofweek='Saturday' ){
-    if($period=='month')
-    { $dayofweek = date('l', strtotime($value));
-        if ($dayofweek=='Sunday')
-            $value = date('Y-m-d',strtotime("".$value." -2 days"));
-    if ($dayofweek=='Saturday')
-            $value = date('Y-m-d',strtotime("".$value." -1 day"));
- 
+     
+    $dayofweek = date('l', strtotime($value));
+  
+     if ($dayofweek='Sunday' or $dayofweek='Saturday' )
+    {
+        if($period=='month')
+            { 
+            $dayofweek = date('l', strtotime($value)); 
+            if ($dayofweek=='Sunday')
+                    $value = date('Y-m-d',strtotime("".$value." -2 days"));
+            if ($dayofweek=='Saturday')
+                    $value = date('Y-m-d',strtotime("".$value." -1 day"));
+            }
     }
-}
-     $dataForSingleDate = $dataForAllDays->{$value};  
-       if (!empty($dataForSingleDate)){
-    echo 'time : '.$value.'<br/>';
+             
+  $dataForSingleDate = $dataForAllDays->{$value}; 
+    while (empty($dataForSingleDate))
+        
+    {   
+        $counter = $counter+1;
+        $value = date('Y-m-d',strtotime("".$value." -".$counter." day"));
+        $dataForSingleDate = $dataForAllDays->{$value}; 
+        
+    }
+    
+    if (!empty($dataForSingleDate))
+    {
+        echo '<br/>';
+echo ''.$value.'<br/>';
 $open = $dataForSingleDate->{'1. open'};
 echo  $open. '<br/>';
 echo $dataForSingleDate->{'2. high'} . '<br/>';
 echo $dataForSingleDate->{'3. low'} . '<br/>';
 echo $dataForSingleDate->{'4. close'} . '<br/>';
-echo $dataForSingeDate->{'5. volume'} . '<br/>';
+echo $dataForSingleDate->{'5. volume'} . '<br/>';
     }
-}
 
-    
-include ('record.php');
+       }
 
+//include ('record.php');
 ?>
 
